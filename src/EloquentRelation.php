@@ -23,7 +23,7 @@ class EloquentRelation implements RelationContract
 
     public function syncRelation(string|int $parentId, string $relationName, array $rows, array $meta): void
     {
-        $parent = $this->parentModelClass::findOrFail($parentId);
+        $parent = (new $this->parentModelClass())->newQuery()->findOrFail($parentId);
 
         if (!method_exists($parent, $relationName)) {
             return;

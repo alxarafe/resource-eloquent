@@ -6,28 +6,28 @@
 ![Static Analysis](https://img.shields.io/badge/static%20analysis-PHPStan%20%2B%20Psalm-blue?style=flat-square)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/alxarafe/resource-eloquent/issues)
 
-**Eloquent ORM adapter for alxarafe/resource-controller.**
+**Adaptador ORM Eloquent para alxarafe/resource-controller.**
 
-Implements `RepositoryContract`, `QueryContract`, and `TransactionContract` using Illuminate Database.
+Implementa `RepositoryContract`, `QueryContract` y `TransactionContract` usando Illuminate Database.
 
-## Ecosystem
+## Ecosistema
 
-| Package | Purpose | Status |
+| Paquete | Propósito | Estado |
 |---|---|---|
-| **[resource-controller](https://github.com/alxarafe/resource-controller)** | Core CRUD engine + UI components | ✅ Stable |
-| **[resource-eloquent](https://github.com/alxarafe/resource-eloquent)** | Eloquent ORM adapter | ✅ Stable |
-| **[resource-blade](https://github.com/alxarafe/resource-blade)** | Blade template renderer adapter | ✅ Stable |
-| **[resource-twig](https://github.com/alxarafe/resource-twig)** | Twig template renderer adapter | ✅ Stable |
+| **[resource-controller](https://github.com/alxarafe/resource-controller)** | Motor CRUD central + componentes UI | ✅ Estable |
+| **[resource-eloquent](https://github.com/alxarafe/resource-eloquent)** | Adaptador ORM Eloquent | ✅ Estable |
+| **[resource-blade](https://github.com/alxarafe/resource-blade)** | Adaptador de renderizado con Blade | ✅ Estable |
+| **[resource-twig](https://github.com/alxarafe/resource-twig)** | Adaptador de renderizado con Twig | ✅ Estable |
 
-## Installation
+## Instalación
 
 ```bash
 composer require alxarafe/resource-eloquent
 ```
 
-This will automatically install `alxarafe/resource-controller` and `illuminate/database`.
+Esto instalará automáticamente `alxarafe/resource-controller` e `illuminate/database`.
 
-## Usage
+## Uso
 
 ```php
 use Alxarafe\ResourceController\AbstractResourceController;
@@ -35,11 +35,11 @@ use Alxarafe\ResourceController\Contracts\RepositoryContract;
 use Alxarafe\ResourceController\Contracts\TransactionContract;
 use Alxarafe\ResourceEloquent\EloquentRepository;
 use Alxarafe\ResourceEloquent\EloquentTransaction;
-use App\Models\Product; // Your Eloquent model
+use App\Models\Product; // Tu modelo Eloquent
 
 class ProductController extends AbstractResourceController
 {
-    // ... basic controller configuration ...
+    // ... configuración básica del controlador ...
 
     protected function getRepository(string $tabId = 'default'): RepositoryContract
     {
@@ -48,20 +48,20 @@ class ProductController extends AbstractResourceController
 
     protected function getTransaction(): TransactionContract
     {
-        // Get the DB connection from Laravel or Capsule
+        // Obtener la conexión DB de Laravel o Capsule
         return new EloquentTransaction(\Illuminate\Support\Facades\DB::connection());
     }
 }
 ```
 
-## Features
+## Características
 
-- Translates declarative field filtering and querying to Eloquent queries.
-- Manages pagination automatically.
-- Handles simple and compound database transactions seamlessly.
-- Converts Eloquent metadata directly into Resource Controller configurations.
+- Traduce el filtrado y las consultas declarativas a consultas Eloquent.
+- Gestiona la paginación automáticamente.
+- Maneja transacciones de base de datos simples y compuestas sin problemas.
+- Convierte metadatos de Eloquent directamente en configuraciones de Resource Controller.
 
-## Development
+## Desarrollo
 
 ### Docker
 
@@ -70,18 +70,18 @@ docker compose up -d
 docker exec alxarafe-resources composer install
 ```
 
-### Running the CI pipeline locally
+### Ejecutar el pipeline CI en local
 
 ```bash
 bash bin/ci_local.sh
 ```
 
-### Running tests only
+### Ejecutar solo los tests
 
 ```bash
 bash bin/run_tests.sh
 ```
 
-## License
+## Licencia
 
 GPL-3.0-or-later

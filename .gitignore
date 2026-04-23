@@ -2,6 +2,10 @@
 /composer.lock
 /.phpunit.result.cache
 /.phpunit.cache/
+/coverage/
 /.idea/
 /.vscode/
+*.swp
+*.swo
 .DS_Store
+node_modules/

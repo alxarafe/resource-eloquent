@@ -30,6 +30,7 @@ class EloquentRepository implements RepositoryContract
         if (!empty($this->with)) {
             $builder->with($this->with);
         }
+        /** @psalm-suppress InvalidArgument */
         return new EloquentQuery($builder);
     }
 
@@ -50,7 +51,7 @@ class EloquentRepository implements RepositoryContract
     public function save(string|int|null $id, array $data): array
     {
         $model = ($id !== null && $id !== 'new')
-            ? $this->modelClass::findOrFail($id)
+            ? (new $this->modelClass())->newQuery()->findOrFail($id)
             : new $this->modelClass();
 
         $pkName = $model->getKeyName();
@@ -69,7 +70,8 @@ class EloquentRepository implements RepositoryContract
 
     public function delete(string|int $id): bool
     {
-        return (bool) $this->modelClass::destroy($id);
+        $model = (new $this->modelClass())->newQuery()->find($id);
+        return $model ? (bool) $model->delete() : false;
     }
 
     public function getPrimaryKey(): string
@@ -104,7 +106,7 @@ class EloquentRepository implements RepositoryContract
         }
 
         try {
-            $columns = DB::select("SHOW COLUMNS FROM `{$fullTable}`");
+            $columns = DB::connection()->select("SHOW COLUMNS FROM `{$fullTable}`");
         } catch (\Throwable) {
             return [];
         }

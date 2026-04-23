@@ -13,8 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EloquentQuery implements QueryContract
 {
+    /** @var Builder<\Illuminate\Database\Eloquent\Model> */
     private Builder $builder;
 
+    /** @param Builder<\Illuminate\Database\Eloquent\Model> $builder */
     public function __construct(Builder $builder)
     {
         $this->builder = $builder;
@@ -52,7 +54,7 @@ class EloquentQuery implements QueryContract
 
     public function search(array $fields, string $term): static
     {
-        $this->builder->where(function ($q) use ($fields, $term) {
+        $this->builder->where(function (Builder $q) use ($fields, $term) {
             foreach ($fields as $field) {
                 $q->orWhereRaw("LOWER({$field}) LIKE LOWER(?)", ["%{$term}%"]);
             }
@@ -75,8 +77,9 @@ class EloquentQuery implements QueryContract
     public function paginate(int $limit, int $offset = 0): PaginatedResult
     {
         $total = $this->builder->count();
-        $items = $this->builder->limit($limit)->offset($offset)->get()
-            ->map(fn($m) => $m->toArray())->all();
+        $models = $this->builder->limit($limit)->offset($offset)->get()->all();
+        /** @phpstan-ignore-next-line */
+        $items = array_map(fn(\Illuminate\Database\Eloquent\Model $m) => $m->toArray(), $models);
         return new PaginatedResult($items, $total, $limit, $offset);
     }
 

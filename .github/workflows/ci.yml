@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+          coverage: none
+
+      - name: Install Composer deps
+        run: composer install --no-interaction --no-progress
+
+      - name: PHPCBF (autofix)
+        run: vendor/bin/phpcbf --standard=phpcs.xml src tests -s || true
+
+      - name: PHPCS (lint)
+        run: vendor/bin/phpcs --standard=phpcs.xml src tests
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse src --memory-limit=1G
+
+      - name: Psalm
+        run: vendor/bin/psalm src --output-format=github
