@@ -50,6 +50,13 @@ class EloquentRepository implements RepositoryContract
 
     public function save(string|int|null $id, array $data): array
     {
+        if (method_exists($this->modelClass, 'validateData')) {
+            $errors = $this->modelClass::validateData($data);
+            if (!empty($errors)) {
+                throw new \RuntimeException('Validation failed: ' . implode('; ', $errors));
+            }
+        }
+
         $model = ($id !== null && $id !== 'new')
             ? (new $this->modelClass())->newQuery()->findOrFail($id)
             : new $this->modelClass();
@@ -132,8 +139,48 @@ class EloquentRepository implements RepositoryContract
                 'nullable' => $nullable,
                 'default' => $col->Default,
             ];
+
+            $limits = self::computeNumericLimits($dbType);
+            $fields[$name] = array_merge($fields[$name], $limits);
         }
         return $fields;
+    }
+
+    private static function computeNumericLimits(string $dbType): array
+    {
+        $t = strtolower($dbType);
+        $unsigned = str_contains($t, 'unsigned');
+
+        $intRanges = [
+            'tinyint'   => ['signed' => [-128, 127],           'unsigned' => [0, 255]],
+            'smallint'  => ['signed' => [-32768, 32767],        'unsigned' => [0, 65535]],
+            'mediumint' => ['signed' => [-8388608, 8388607],    'unsigned' => [0, 16777215]],
+            'bigint'    => ['signed' => [PHP_INT_MIN, PHP_INT_MAX], 'unsigned' => [0, PHP_INT_MAX]],
+            'int'       => ['signed' => [-2147483648, 2147483647], 'unsigned' => [0, 4294967295]],
+        ];
+
+        foreach ($intRanges as $type => $ranges) {
+            if (str_contains($t, $type)) {
+                $range = $unsigned ? $ranges['unsigned'] : $ranges['signed'];
+                return ['min' => $range[0], 'max' => $range[1], 'step' => 1, 'unsigned' => $unsigned];
+            }
+        }
+
+        if (preg_match('/(?:decimal|numeric)\((\d+),(\d+)\)/', $t, $m)) {
+            $precision = (int) $m[1];
+            $scale = (int) $m[2];
+            $maxVal = (float) (str_repeat('9', $precision - $scale) . '.' . str_repeat('9', $scale));
+            $minVal = $unsigned ? 0 : -$maxVal;
+            $step = $scale > 0 ? (float) ('0.' . str_repeat('0', $scale - 1) . '1') : 1;
+            return ['min' => $minVal, 'max' => $maxVal, 'step' => $step,
+                    'precision' => $precision, 'scale' => $scale, 'unsigned' => $unsigned];
+        }
+
+        if (str_contains($t, 'float') || str_contains($t, 'double')) {
+            return ['unsigned' => $unsigned];
+        }
+
+        return [];
     }
 
     private static function mapType(string $t): string
