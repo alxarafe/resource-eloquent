@@ -95,4 +95,10 @@ class EloquentQuery implements QueryContract
         });
         return $this;
     }
+
+    public function whereRaw(string $sql, array $params = []): static
+    {
+        $this->builder->whereRaw($sql, $params);
+        return $this;
+    }
 }
